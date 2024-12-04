@@ -46,7 +46,7 @@ Integration tests are launched via bash script `cat/run_tests.sh`.
 $ ./run_tests.sh
 ```
 
-![Cat testing](assets/cat tests.png)
+![Cat testing](assets/cat_tests.png)
 
 > This was developed on MacOS, some tests may fail on other systems
 
@@ -82,6 +82,6 @@ Integration tests are launched via bash script `grep/run_tests.sh`.
 $ make testus
 $ cd test && ./testus
 ```
-![Grep testing](assets/grep tests.png)
+![Grep testing](assets/grep_tests.png)
 
 > This was developed on MacOS, some tests may fail on other systems

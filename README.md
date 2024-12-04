@@ -16,7 +16,7 @@ Implementation of GNU `cat` and BSD `grep`.
 
 ```
 $ git clone https://github.com/SergeyVigman/simple_bash_utility
-$ cd s21_cat_grep/src/
+$ cd simple_bash_utility/src/
 $ make
 ```
 

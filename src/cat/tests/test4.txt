@@ -1,0 +1,4 @@
+This line ends with a special character $
+Another tab	here
+Final line with special char 
+

@@ -1,0 +1,3 @@
+Tab	Test	with	tab
+Control characters: ^A ^B ^C
+

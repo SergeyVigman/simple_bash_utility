@@ -1,0 +1,25 @@
+Usage: s21_grep [OPTION]... PATTERN [FILE]...
+
+Search for PATTERN in each FILE.
+
+Options:
+  -e PATTERN     Use PATTERN as the search pattern (can be used multiple times).
+  -v             Invert match (select non-matching lines).
+  -i             Ignore case distinctions in the pattern.
+  -c             Count the number of matching lines per file.
+  -l             Print only the names of files with matching lines.
+  -n             Prefix each matching line with its line number.
+  -h             Suppress the filename prefix on output (useful when searching a single file).
+  -s             Suppress error messages about nonexistent or unreadable files.
+  -o             Print only the matched parts of the line, one per line.
+  -f FILE        Take the patterns from FILE, one per line.
+
+Examples:
+  s21_grep -e "warning" log.txt
+  s21_grep -v "test" file1.txt file2.txt
+  s21_grep -i "hello" file.txt
+  s21_grep -c "pattern" file.txt
+  s21_grep -l "search" *.txt
+  s21_grep -n "error" file.log
+  s21_grep -o "word" textfile.txt
+  s21_grep -f patterns.txt file.txt

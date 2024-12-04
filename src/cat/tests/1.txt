@@ -1,0 +1,12 @@
+Hello, world!
+	This is a line with a tab.
+	
+Next line after a blank line.
+
+Control characters:
+^A^B^C^D
+
+
+
+
+The last line ends here.	

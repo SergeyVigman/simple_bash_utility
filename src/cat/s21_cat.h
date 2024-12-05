@@ -10,14 +10,14 @@ typedef struct arguments {
   int b, e, n, s, t, v, T, E;
 } arguments;
 
-size_t getMaxLenString(FILE* file);
-arguments argument_parser(int argc, char* argv[]);
+arguments argument_parser(int argc, char *argv[]);
 void fileError(char arg[]);
 void printUsage();
-void printFile(arguments arg, char* filepath, int argc, int count);
-void CatNoPath();
-void charProcessing(char* buff, arguments arg);
-void lineCounter(char buff, arguments arg, size_t* lineCount);
-int emptyLines(char buff, int* isLastLineEmpty);
+void printFile(arguments arg, char *filepath, int argc, int count);
+void catNoPath();
+void fileProcessing(FILE *file, arguments arg);
+void charProcessing(int ch, arguments arg);
+void processNewline(arguments arg, int last_char, int *blank_line_streak);
+void printLineNumber(arguments arg, size_t *line_counter, int ch);
 
 #endif

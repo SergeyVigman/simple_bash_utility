@@ -7,118 +7,90 @@ void fileError(char arg[]) {
 
 void printUsage() { printf("usage: s21_cat [-benstv] [file ...]\n"); }
 
-size_t getMaxLenString(FILE* file) {
-  size_t maxLength = 0;
-  size_t currentLength = 0;
-  int ch;
-
-  while ((ch = fgetc(file)) != EOF) {
-    currentLength++;
-    if (ch == '\n') {
-      if (currentLength > maxLength) {
-        maxLength = currentLength;
-      }
-      currentLength = 0;
-    }
-  }
-
-  if (currentLength > maxLength) {
-    maxLength = currentLength;
-  }
-
-  rewind(file);
-  return maxLength;
-}
-
 void printFile(arguments arg, char* filepath, int argc, int count) {
-  int isLastLineEmpty = 0;
   FILE* file = fopen(filepath, "r");
-  size_t lineCount = 1;
-
-  if (file == NULL) {
+  if (file) {
+    fileProcessing(file, arg);
+  } else {
     fileError(filepath);
-    if (count + 1 == argc - 1) exit(0);
-    return;
+    if (count + 1 == argc - 1)
+      exit(EXIT_FAILURE);  // проверка что файл последний
   }
 
-  size_t MaxLenString = getMaxLenString(file);
-  char* buff = malloc(MaxLenString + 1);
-  if (buff == NULL) {
-    printf("Error! memory not allocated.");
-    fclose(file);
-    exit(1);
-  }
-
-  while (fgets(buff, MaxLenString + 1, file) != NULL) {
-    if (arg.s & (emptyLines(buff[0], &isLastLineEmpty) == 0)) {
-      continue;
-    }
-
-    if (arg.b) {
-      lineCounter(buff[0], arg, &lineCount);
-    } else if (arg.n && !arg.b) {
-      printf("%6zu\t", lineCount++);
-    }
-
-    charProcessing(buff, arg);
-  }
-
-  if (buff != NULL) {
-    free(buff);
-  }
   fclose(file);
 }
 
-int emptyLines(char buff, int* isLastLineEmpty) {
-  if ((buff == '\n') && (!*isLastLineEmpty)) {
-    *isLastLineEmpty = 1;
-  } else if ((buff == '\n') && (*isLastLineEmpty)) {
-    return 0;
-  } else if (buff != '\n') {
-    *isLastLineEmpty = 0;
-  }
-  return 1;
-}
-
-void lineCounter(char buff, arguments arg, size_t* lineCount) {
-  if (buff != '\n') {
-    printf("%6zu\t", (*lineCount)++);
-  } else if (arg.e) {
-    printf("      \t");
+void printLineNumber(arguments arg, size_t* line_counter, int ch) {
+  // нумерация строк
+  if (arg.b && ch != '\n') {
+    printf("%6zu\t", (*line_counter)++);
+  } else if (arg.n && !arg.b) {
+    printf("%6zu\t", (*line_counter)++);
   }
 }
 
-void charProcessing(char* buff, arguments arg) {
-  for (size_t i = 0; buff[i] != '\0'; i++) {
-    if (arg.e && buff[i] == '\n') {
-      printf("$");
+void processNewline(arguments arg, int last_char, int* blank_line_streak) {
+  // новая строка
+  if (arg.e) {
+    if (last_char == '\n' && arg.b) {
+      printf("      \t");
     }
-    if (buff[i] >= 32 && buff[i] <= 126) {
-      putchar(buff[i]);
-    } else if (buff[i] == '\t' && arg.t) {
-      printf("^I");
-    } else if (buff[i] == '\n') {
-      putchar('\n');
-    } else if (arg.v) {
-      unsigned char ch = (unsigned char)buff[i];
+    printf("$");
+  }
+  putchar('\n');
 
-      if (ch == 127) {
-        printf("^?");
-      } else if (ch < 32 && ch != 9 && ch != 10) {
-        printf("^%c", ch + 64);
-      } else if (ch > 126 /*&& ch < 160*/) {
-        printf("M-^%c", (ch - 128) + 64);
-      } else {
-        putchar(ch);
-      }
+  *blank_line_streak = (last_char == '\n') ? 1 : 0;
+}
 
+void charProcessing(int ch, arguments arg) {
+  // обработка символов
+  if (ch >= 32 && ch <= 126) {
+    putchar(ch);
+  } else if (ch == '\t' && arg.t) {
+    printf("^I");
+  } else if (arg.v) {
+    if (ch == 127) {
+      printf("^?");
+    } else if (ch < 32 && ch != '\t' && ch != '\n') {
+      printf("^%c", ch + 64);
+    } else if (ch > 126 && ch < 160) {
+      printf("M-^%c", (ch - 128) + 64);
     } else {
-      putchar(buff[i]);
+      putchar(ch);
     }
+  } else {
+    putchar(ch);
   }
 }
 
-void CatNoPath() {
+void fileProcessing(FILE* file, arguments arg) {
+  size_t line_counter = 1;
+  int ch;
+  int last_char = '\n';
+  int blank_line_streak = 0;
+
+  while ((ch = fgetc(file)) != EOF) {
+    if (last_char == '\n') {
+      if (arg.s && blank_line_streak && ch == '\n') {  // -s
+        continue;
+      }
+      // нумерация строк
+      printLineNumber(arg, &line_counter, ch);
+    }
+    if (ch == '\n') {
+      // новая строка
+      processNewline(arg, last_char, &blank_line_streak);
+    } else {
+      blank_line_streak = 0;
+      // обработка символов
+      charProcessing(ch, arg);
+    }
+
+    last_char = ch;
+  }
+}
+
+void catNoPath() {
   int c;
   while ((c = getchar()) != EOF) {
     putchar(c);
@@ -158,6 +130,7 @@ arguments argument_parser(int argc, char* argv[]) {
         break;
       case 'T':
         arg.t = 1;
+        arg.v = 0;
         break;
       case 'E':
         arg.e = 1;
@@ -175,7 +148,7 @@ arguments argument_parser(int argc, char* argv[]) {
 int main(int argc, char* argv[]) {
   arguments arg = argument_parser(argc, argv);
   if (optind == argc) {
-    CatNoPath();
+    catNoPath();
   } else {
     for (int i = optind; i < argc; i++) {
       printFile(arg, argv[i], argc, i);
